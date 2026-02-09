@@ -511,17 +511,23 @@ body {
   line-height: 1.8 !important;
 }
 
-/* MDEditor toolbar — contextual: hidden by default, visible on hover/focus */
-/* Uses opacity only — space is always reserved, no layout shift */
+/* MDEditor toolbar — wood grain shelf, tools fade in on hover */
 .editor-body .w-md-editor-toolbar {
-  background: var(--surface) !important;
+  background:
+    var(--sidebar-bg)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='44'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01 0.2' numOctaves='5' seed='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='44' filter='url(%23w)' opacity='.06'/%3E%3C/svg%3E") !important;
   border-bottom-color: var(--border) !important;
+  position: relative;
+}
+
+/* Toolbar buttons fade in; wood grain always visible */
+.editor-body .w-md-editor-toolbar ul {
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
-.editor-body .w-md-editor:hover .w-md-editor-toolbar,
-.editor-body .w-md-editor:focus-within .w-md-editor-toolbar {
+.editor-body .w-md-editor:hover .w-md-editor-toolbar ul,
+.editor-body .w-md-editor:focus-within .w-md-editor-toolbar ul {
   opacity: 1;
 }
 
