@@ -330,10 +330,35 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary);
+  padding: 48px;
+}
+
+/* === Daily teaching === */
+.daily-teaching {
+  max-width: 520px;
+  text-align: center;
+  animation: teachingAppear 1.2s ease-out;
+}
+
+.teaching-text {
+  font-size: 17px;
+  line-height: 1.8;
+  color: var(--text);
   font-style: italic;
-  font-size: 16px;
+  letter-spacing: 0.2px;
+  margin-bottom: 20px;
+}
+
+.teaching-source {
+  font-size: 12px;
+  color: var(--text-secondary);
   letter-spacing: 0.5px;
+}
+
+@keyframes teachingAppear {
+  0% { opacity: 0; transform: translateY(6px); }
+  40% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 /* === The Paper Sheet (editor as object on table) === */

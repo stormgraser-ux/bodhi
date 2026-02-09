@@ -73,9 +73,6 @@ export function useNotes() {
     dispatch({ type: "SET_LOADING", loading: true });
     const notes = await db.getAllNotes();
     dispatch({ type: "SET_NOTES", notes });
-    if (notes.length > 0) {
-      dispatch({ type: "SELECT", id: notes[0].id });
-    }
   }, []);
 
   useEffect(() => {

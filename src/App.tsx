@@ -9,6 +9,7 @@ import { TagFilter } from "./components/TagFilter";
 import { PrivacyPanel } from "./components/PrivacyPanel";
 import { EnsoLoader } from "./components/EnsoLoader";
 import { InkDivider } from "./components/InkDivider";
+import { DailyTeaching } from "./components/DailyTeaching";
 
 type MobileView = "list" | "editor";
 
@@ -135,7 +136,7 @@ export default function App() {
           />
         ) : (
           <div className="editor-empty">
-            <p>The page awaits.</p>
+            <DailyTeaching />
           </div>
         )}
         {focusMode && (
