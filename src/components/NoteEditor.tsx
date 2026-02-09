@@ -3,6 +3,7 @@ import MDEditor from "@uiw/react-md-editor";
 import type { Note } from "../types/note";
 import { TagInput } from "./TagInput";
 import { useMediaQuery } from "../hooks/useMediaQuery";
+import { spawnLeaf } from "../lib/leaf";
 
 interface NoteEditorProps {
   note: Note;
@@ -17,8 +18,10 @@ export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBa
   const [title, setTitle] = useState(note.title);
   const [body, setBody] = useState(note.body);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showSaveDot, setShowSaveDot] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const noteIdRef = useRef(note.id);
+  const releaseBtnRef = useRef<HTMLButtonElement | null>(null);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   useEffect(() => {
@@ -34,6 +37,9 @@ export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBa
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
         onSave(note.id, t, b);
+        // Gold dot presence
+        setShowSaveDot(true);
+        setTimeout(() => setShowSaveDot(false), 1800);
       }, 1000);
     },
     [note.id, onSave]
@@ -57,9 +63,14 @@ export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBa
     save(title, newBody);
   };
 
-  const handleDelete = () => {
+  const handleRelease = () => {
+    // Spawn falling leaf from the button
+    if (releaseBtnRef.current) {
+      spawnLeaf(releaseBtnRef.current);
+    }
     setShowDeleteConfirm(false);
-    onDelete(note.id);
+    // Brief pause so the leaf is visible before the note disappears
+    setTimeout(() => onDelete(note.id), 300);
   };
 
   return (
@@ -73,16 +84,18 @@ export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBa
         <input
           className="editor-title"
           type="text"
-          placeholder="Untitled"
+          placeholder="Unwritten"
           value={title}
           onChange={handleTitleChange}
         />
+        <div className={`save-dot ${showSaveDot ? "visible" : ""}`} />
         <button
           className="btn-delete"
+          ref={releaseBtnRef}
           onClick={() => setShowDeleteConfirm(true)}
-          title="Delete note"
+          title="Release this note"
         >
-          Let go
+          Release
         </button>
       </div>
       <div className="editor-tags">
@@ -105,13 +118,13 @@ export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBa
       {showDeleteConfirm && (
         <div className="confirm-overlay" onClick={() => setShowDeleteConfirm(false)}>
           <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
-            <p>Let go of "{note.title || "Untitled"}"?</p>
+            <p>Release &ldquo;{note.title || "Unwritten"}&rdquo; back to emptiness?</p>
             <div className="confirm-actions">
               <button className="btn-cancel" onClick={() => setShowDeleteConfirm(false)}>
                 Keep
               </button>
-              <button className="btn-danger" onClick={handleDelete}>
-                Let go
+              <button className="btn-danger" ref={releaseBtnRef} onClick={handleRelease}>
+                Release
               </button>
             </div>
           </div>

@@ -12,7 +12,7 @@ function formatDate(iso: string): string {
   const diffMs = now.getTime() - d.getTime();
   const diffMins = Math.floor(diffMs / 60000);
 
-  if (diffMins < 1) return "Just now";
+  if (diffMins < 1) return "just now";
   if (diffMins < 60) return `${diffMins}m ago`;
 
   const diffHours = Math.floor(diffMins / 60);
@@ -53,7 +53,7 @@ export function NoteListItem({ note, isSelected, onSelect }: NoteListItemProps) 
             opacity="0.5"
           />
         </svg>
-        {note.title || "Untitled"}
+        {note.title || "Unwritten"}
       </div>
       <div className="note-list-item-preview">
         {getPreview(note.body) || "Empty note"}
