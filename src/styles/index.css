@@ -312,7 +312,7 @@ body {
   color: var(--danger);
 }
 
-/* === Editor pane === */
+/* === Editor pane (the "table") === */
 .editor-pane {
   flex: 1;
   display: flex;
@@ -323,6 +323,21 @@ body {
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)' opacity='0.06'/%3E%3C/svg%3E");
   background-repeat: repeat;
+  position: relative;
+}
+
+/* Lotus motif — lives on the table, peeks around the paper sheet */
+.editor-pane::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: min(700px, 80vw);
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20800%20800'%3E%3Cdefs%3E%3Cfilter%20id='grain'%20x='-20%25'%20y='-20%25'%20width='140%25'%20height='140%25'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.9'%20numOctaves='2'%20stitchTiles='stitch'/%3E%3CfeColorMatrix%20type='matrix'%20values='1%200%200%200%200%200%201%200%200%200%200%200%201%200%200%200%200%200%200.35%200'/%3E%3C/filter%3E%3Cfilter%20id='soften'%3E%3CfeGaussianBlur%20stdDeviation='0.35'/%3E%3C/filter%3E%3C/defs%3E%3Cg%20fill='none'%20stroke='%231a1a1a'%20stroke-width='6'%20stroke-linecap='round'%20stroke-linejoin='round'%20filter='url(%23soften)'%3E%3Cpath%20d='M400%20620c-70-40-120-95-150-165%2065%205%20115%2025%20150%2062%2035-37%2085-57%20150-62-30%2070-80%20125-150%20165Z'/%3E%3Cpath%20d='M400%20620c-95-25-165-80-205-155%2075-15%20140%200%20195%2045%2055-45%20120-60%20195-45-40%2075-110%20130-205%20155Z'/%3E%3Cpath%20d='M255%20520c-55-20-95-55-120-105%2060-5%20110%2010%20150%2045'/%3E%3Cpath%20d='M545%20520c55-20%2095-55%20120-105-60-5-110%2010-150%2045'/%3E%3Cpath%20d='M400%20585c-48-30-82-68-102-114%2045%205%2080%2020%20102%2045%2022-25%2057-40%20102-45-20%2046-54%2084-102%20114Z'/%3E%3Cpath%20d='M400%20540c-30-22-52-48-66-78%2030%204%2052%2014%2066%2030%2014-16%2036-26%2066-30-14%2030-36%2056-66%2078Z'/%3E%3Cpath%20d='M400%20520c-18%200-34-10-40-24%2014-6%2026-9%2040-9s26%203%2040%209c-6%2014-22%2024-40%2024Z'/%3E%3C/g%3E%3Cg%20opacity='0.18'%20filter='url(%23grain)'%3E%3Crect%20width='800'%20height='800'%20fill='%231a1a1a'/%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.04;
 }
 
 .editor-empty {
@@ -331,6 +346,8 @@ body {
   align-items: center;
   justify-content: center;
   padding: 48px;
+  position: relative;
+  z-index: 1;
 }
 
 /* === Daily teaching === */
@@ -377,6 +394,7 @@ body {
     0 1px 3px rgba(26, 26, 26, 0.04),
     0 8px 24px rgba(26, 26, 26, 0.06);
   position: relative;
+  z-index: 1; /* sits above the lotus motif */
   animation: sheetAppear 0.6s ease-out;
 }
 
