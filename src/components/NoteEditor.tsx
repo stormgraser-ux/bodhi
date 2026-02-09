@@ -82,7 +82,7 @@ export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBa
           onClick={() => setShowDeleteConfirm(true)}
           title="Delete note"
         >
-          Delete
+          Let go
         </button>
       </div>
       <div className="editor-tags">
@@ -105,13 +105,13 @@ export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBa
       {showDeleteConfirm && (
         <div className="confirm-overlay" onClick={() => setShowDeleteConfirm(false)}>
           <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
-            <p>Delete "{note.title || "Untitled"}"?</p>
+            <p>Let go of "{note.title || "Untitled"}"?</p>
             <div className="confirm-actions">
               <button className="btn-cancel" onClick={() => setShowDeleteConfirm(false)}>
-                Cancel
+                Keep
               </button>
               <button className="btn-danger" onClick={handleDelete}>
-                Delete
+                Let go
               </button>
             </div>
           </div>

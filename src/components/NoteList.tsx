@@ -20,7 +20,7 @@ export function NoteList({ notes, selectedId, onSelect, onCreate }: NoteListProp
       <div className="note-list-items">
         {notes.length === 0 ? (
           <div className="note-list-empty">
-            No notes yet. Click + to create one.
+            Begin when you are ready.
           </div>
         ) : (
           notes.map((note) => (

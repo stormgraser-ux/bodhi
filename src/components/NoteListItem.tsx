@@ -37,6 +37,22 @@ export function NoteListItem({ note, isSelected, onSelect }: NoteListItemProps) 
       onClick={() => onSelect(note.id)}
     >
       <div className="note-list-item-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+          <path
+            d="M12 2C12 2 6 8 6 14c0 3.3 2.7 6 6 6s6-2.7 6-6c0-6-6-12-6-12z"
+            stroke="var(--text-secondary)"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M12 22V8"
+            stroke="var(--text-secondary)"
+            strokeWidth="1"
+            strokeLinecap="round"
+            opacity="0.5"
+          />
+        </svg>
         {note.title || "Untitled"}
       </div>
       <div className="note-list-item-preview">

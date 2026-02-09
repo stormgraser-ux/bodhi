@@ -7,6 +7,7 @@ import { NoteEditor } from "./components/NoteEditor";
 import { SearchBar } from "./components/SearchBar";
 import { TagFilter } from "./components/TagFilter";
 import { PrivacyPanel } from "./components/PrivacyPanel";
+import { EnsoLoader } from "./components/EnsoLoader";
 
 type MobileView = "list" | "editor";
 
@@ -56,7 +57,7 @@ export default function App() {
   }, []);
 
   if (notes.loading) {
-    return <div className="loading">Loading...</div>;
+    return <EnsoLoader />;
   }
 
   const sidebarClass = isMobile
@@ -110,7 +111,7 @@ export default function App() {
           />
         ) : (
           <div className="editor-empty">
-            <p>Select a note or create a new one</p>
+            <p>The page awaits.</p>
           </div>
         )}
       </div>

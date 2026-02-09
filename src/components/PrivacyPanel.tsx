@@ -1,3 +1,5 @@
+import { UpdateChecker } from "./UpdateChecker";
+
 interface PrivacyPanelProps {
   onClose: () => void;
 }
@@ -7,7 +9,7 @@ export function PrivacyPanel({ onClose }: PrivacyPanelProps) {
     <div className="confirm-overlay" onClick={onClose}>
       <div className="privacy-panel" onClick={(e) => e.stopPropagation()}>
         <div className="privacy-header">
-          <h2>Privacy Guarantees</h2>
+          <h2>Your thoughts stay with you</h2>
           <button className="btn-close" onClick={onClose}>&times;</button>
         </div>
         <div className="privacy-content">
@@ -38,7 +40,7 @@ export function PrivacyPanel({ onClose }: PrivacyPanelProps) {
 
           <div className="privacy-section">
             <h3>Verify it yourself</h3>
-            <p>Don't take our word for it. Here's how to prove it:</p>
+            <p>You can verify this yourself:</p>
             <ol>
               <li>
                 <strong>Network tab test:</strong> Open Developer Tools (Ctrl+Shift+I),
@@ -56,6 +58,8 @@ export function PrivacyPanel({ onClose }: PrivacyPanelProps) {
               </li>
             </ol>
           </div>
+
+          <UpdateChecker />
         </div>
       </div>
     </div>

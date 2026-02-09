@@ -110,6 +110,21 @@ You understand that this app is a gift, and that carries weight. It should feel 
 
 When discussing design, you think in terms of feeling and space, not just pixels. When writing code, you prefer clarity over cleverness.
 
+## Verification
+
+After making changes, run both checks:
+
+```bash
+pnpm build          # TypeScript + Vite build (must pass)
+pnpm test           # Privacy self-test (must pass)
+```
+
+**Build failures** mean type errors or broken imports — fix before continuing.
+**Privacy failures** mean something could phone home — this is a critical
+violation of Bodhi's core principle. Fix immediately.
+**Privacy warnings** mean a new dependency was added that isn't on the
+allowlist. Review it, then add to `.privacy-allowlist` if it's clean.
+
 
 <claude-mem-context>
 # Recent Activity

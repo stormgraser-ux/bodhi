@@ -9,7 +9,9 @@
     "dev:pwa": "VITE_BUILD_TARGET=pwa vite",
     "build:pwa": "VITE_BUILD_TARGET=pwa tsc && VITE_BUILD_TARGET=pwa vite build",
     "preview:pwa": "VITE_BUILD_TARGET=pwa vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "test": "bash test-privacy.sh",
+    "test:privacy": "bash test-privacy.sh"
   },
   "packageManager": "pnpm@10.28.2",
   "devDependencies": {
@@ -23,7 +25,9 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^2.10.1",
+    "@tauri-apps/plugin-process": "^2.3.1",
     "@tauri-apps/plugin-sql": "^2.3.2",
+    "@tauri-apps/plugin-updater": "^2.10.0",
     "@uiw/react-md-editor": "^4.0.11",
     "idb": "^8.0.3",
     "react": "^19.2.4",

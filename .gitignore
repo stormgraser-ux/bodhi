@@ -3,3 +3,13 @@ dist/
 src-tauri/target/
 *.db
 *.db-journal
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
