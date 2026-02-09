@@ -512,19 +512,17 @@ body {
 }
 
 /* MDEditor toolbar — contextual: hidden by default, visible on hover/focus */
+/* Uses opacity only — space is always reserved, no layout shift */
 .editor-body .w-md-editor-toolbar {
   background: var(--surface) !important;
   border-bottom-color: var(--border) !important;
   opacity: 0;
-  max-height: 0;
-  overflow: hidden;
-  transition: opacity 0.3s ease, max-height 0.3s ease;
+  transition: opacity 0.3s ease;
 }
 
 .editor-body .w-md-editor:hover .w-md-editor-toolbar,
 .editor-body .w-md-editor:focus-within .w-md-editor-toolbar {
   opacity: 1;
-  max-height: 50px;
 }
 
 /* === Ink wash divider === */
