@@ -109,7 +109,7 @@ export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBa
         <MDEditor
           value={body}
           onChange={handleBodyChange}
-          preview={isMobile ? "edit" : "live"}
+          preview="edit"
           height="100%"
           visibleDragbar={false}
           hideToolbar={isMobile}
