@@ -555,3 +555,86 @@ body {
   font-size: 13px;
   font-family: "SF Mono", "Consolas", "Monaco", monospace;
 }
+
+/* Back button (mobile) */
+.btn-back {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: var(--accent);
+  line-height: 1;
+}
+
+/* Mobile layout */
+@media (max-width: 768px) {
+  .app {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-width: 0;
+    border-right: none;
+  }
+
+  .editor-pane {
+    width: 100%;
+  }
+
+  .mobile-visible {
+    display: flex;
+    flex: 1;
+    height: 100vh;
+  }
+
+  .mobile-hidden {
+    display: none;
+  }
+
+  /* Touch-friendly tap targets */
+  .note-list-item {
+    padding: 16px;
+  }
+
+  .search-bar input {
+    padding: 12px 36px 12px 16px;
+    font-size: 16px; /* prevents iOS zoom on focus */
+  }
+
+  .tag-chip {
+    padding: 6px 14px;
+    font-size: 14px;
+  }
+
+  .editor-header {
+    padding: 12px 16px 8px;
+  }
+
+  .editor-tags {
+    padding: 0 16px 8px;
+  }
+
+  .editor-body {
+    padding: 0 8px 16px;
+  }
+
+  .editor-title {
+    font-size: 20px;
+  }
+
+  /* iOS safe area insets */
+  .sidebar {
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .editor-pane {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
