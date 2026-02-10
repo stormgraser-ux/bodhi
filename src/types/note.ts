@@ -13,4 +13,10 @@ export interface NoteRow {
   body: string;
   created_at: string;
   updated_at: string;
+  crdt_state?: Uint8Array | null;
+}
+
+export interface DeletionRecord {
+  note_id: string;
+  deleted_at: string;
 }

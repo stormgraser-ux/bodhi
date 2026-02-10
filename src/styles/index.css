@@ -244,6 +244,27 @@ body {
   font-style: italic;
 }
 
+/* Mobile empty state: teaching + lotus below */
+.note-list-empty-mobile {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 48px 24px;
+}
+
+.mobile-lotus {
+  width: min(280px, 65vw);
+  margin-top: 24px;
+  opacity: 0.06;
+}
+
+.mobile-lotus svg {
+  width: 100%;
+  height: auto;
+}
+
 /* === Note list item === */
 .note-list-item {
   padding: 16px 24px;
@@ -1124,6 +1145,219 @@ body {
   margin-left: 24px;
 }
 
+/* === Sidebar header actions === */
+.sidebar-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* === Sync info text (used in pairing panel) === */
+.sync-url {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.sync-url code {
+  background: var(--tag-bg);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 13px;
+  font-family: "SF Mono", "Consolas", "Monaco", monospace;
+  user-select: all;
+}
+
+.sync-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* === Pairing panel (inside Privacy Panel) === */
+.pairing-panel {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: rgba(196, 162, 78, 0.08);
+  border: 1px solid var(--accent-gold);
+  border-radius: 10px;
+}
+
+.pairing-panel h3 {
+  font-size: 15px;
+  margin-bottom: 8px;
+  color: var(--accent-gold);
+}
+
+.pairing-qr {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0;
+}
+
+.pairing-qr svg {
+  border-radius: 10px;
+}
+
+.pairing-input-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.pairing-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 16px; /* prevents iOS zoom */
+  outline: none;
+  background: rgba(255, 255, 255, 0.35);
+  transition: border-color var(--breath) ease-out;
+}
+
+.pairing-input:focus {
+  border-color: var(--accent-gold);
+}
+
+.btn-pair {
+  background: var(--accent-gold);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: opacity var(--breath) ease-out;
+  white-space: nowrap;
+}
+
+.btn-pair:hover {
+  opacity: 0.9;
+}
+
+.btn-pair:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn-forget {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all var(--breath) ease-out;
+}
+
+.btn-forget:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.pairing-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.pairing-connected {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.pairing-connected code {
+  background: var(--tag-bg);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 13px;
+  font-family: "SF Mono", "Consolas", "Monaco", monospace;
+  user-select: all;
+}
+
+.pairing-status {
+  font-size: 12px;
+  color: var(--accent-green);
+  margin-top: 8px;
+}
+
+.pairing-status.pairing-error {
+  color: var(--danger);
+}
+
+/* === Sync button (phone sidebar) === */
+.sync-button-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-sync {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all var(--breath) ease-out;
+}
+
+.btn-sync:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.btn-sync.syncing {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  cursor: wait;
+}
+
+.btn-sync.synced {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+.btn-sync.error {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.sync-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.sync-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--accent-gold);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: syncSpin 0.8s linear infinite;
+}
+
+@keyframes syncSpin {
+  to { transform: rotate(360deg); }
+}
+
+.sync-time {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.sync-error {
+  font-size: 11px;
+  color: var(--danger);
+}
+
 /* === Mobile layout === */
 @media (max-width: 768px) {
   .app {
@@ -1216,5 +1450,19 @@ body {
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+  }
+
+  /* Privacy panel: less padding on mobile */
+  .privacy-panel {
+    padding: 20px 16px;
+  }
+
+  /* Pairing: stack input + button vertically */
+  .pairing-input-group {
+    flex-direction: column;
+  }
+
+  .pairing-panel {
+    padding: 12px;
   }
 }

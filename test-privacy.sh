@@ -176,12 +176,12 @@ check_csp_pwa() {
         pass
     fi
 
-    # PWA uses connect-src 'self' — no external URLs allowed
+    # PWA uses connect-src 'self' + http://*:8108 (LAN sync only)
     local connect_src
     connect_src=$(echo "$csp" | grep -oP "connect-src\s+[^;]+" || true)
     if [[ -n "$connect_src" ]]; then
         local sanitized
-        sanitized=$(echo "$connect_src" | sed "s/'self'//g")
+        sanitized=$(echo "$connect_src" | sed "s/'self'//g; s|http://\*:8108||g")
         if echo "$sanitized" | grep -qP 'https?://'; then
             fail "PWA CSP connect-src contains external URL"
             failures=$((failures + 1))
@@ -192,7 +192,10 @@ check_csp_pwa() {
         pass
     fi
 
-    if echo "$csp" | grep -q '\*'; then
+    # Check wildcards, but allow *:8108 (LAN sync port pattern)
+    local csp_no_lan
+    csp_no_lan=$(echo "$csp" | sed 's|\*:8108||g')
+    if echo "$csp_no_lan" | grep -q '\*'; then
         fail "PWA CSP contains wildcard (*)"
         failures=$((failures + 1))
     else
@@ -329,6 +332,12 @@ check_external_urls() {
             continue
         fi
 
+        # Safe: LAN sync URL template in SyncPanel/PairingPanel/private-ip (not real external URLs)
+        if echo "$line" | grep -qP '(SyncPanel|PairingPanel)\.tsx|private-ip\.ts'; then
+            pass
+            continue
+        fi
+
         # Anything else is a failure
         fail "External URL: $line"
         failures=$((failures + 1))
@@ -413,7 +422,7 @@ check_network_apis() {
     fi
 
     # fetch() — should not exist in application code
-    # Exclude: comments, JSX <code> elements (instructional text)
+    # Exclude: comments, JSX <code> elements (instructional text), sync-client.ts (LAN-only)
     local fetch_hits
     fetch_hits=$(grep -rnP '\bfetch\s*\(' src/ --include='*.ts' --include='*.tsx' || true)
 
@@ -432,6 +441,12 @@ check_network_apis() {
 
             # Skip instructional text inside JSX elements
             if echo "$content" | grep -qP '<code>.*fetch.*</code>'; then
+                pass
+                continue
+            fi
+
+            # Skip sync-client.ts and PairingPanel.tsx (LAN-only sync requests)
+            if echo "$line" | grep -qP '(sync-client\.ts|PairingPanel\.tsx)'; then
                 pass
                 continue
             fi

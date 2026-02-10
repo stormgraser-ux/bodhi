@@ -1,6 +1,7 @@
 # Known-good dependencies for Bodhi
 # Update this file when intentionally adding a new dependency.
 # test-privacy.sh will warn on any dependency not listed here.
+@automerge/automerge
 @tauri-apps/api
 @tauri-apps/cli
 @tauri-apps/plugin-process
@@ -21,3 +22,5 @@ react-dom
 typescript
 vite
 vite-plugin-pwa
+vite-plugin-top-level-await
+vite-plugin-wasm

@@ -32,6 +32,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Build sync PWA for bundling
+        run: pnpm build:sync-pwa
+
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:

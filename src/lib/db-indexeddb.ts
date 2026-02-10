@@ -1,5 +1,6 @@
 import { openDB, type IDBPDatabase } from "idb";
-import type { Note, NoteRow } from "../types/note";
+import type { Note, NoteRow, DeletionRecord } from "../types/note";
+import { createNoteDoc, updateNoteDoc } from "./crdt";
 
 interface BodhiDB {
   notes: {
@@ -12,19 +13,39 @@ interface BodhiDB {
     value: { note_id: string; tag: string };
     indexes: { "by-note": string };
   };
+  deletions: {
+    key: string;
+    value: DeletionRecord;
+  };
+  settings: {
+    key: string;
+    value: { key: string; value: string };
+  };
 }
 
 let dbPromise: Promise<IDBPDatabase<BodhiDB>> | null = null;
 
 function getDb(): Promise<IDBPDatabase<BodhiDB>> {
   if (!dbPromise) {
-    dbPromise = openDB<BodhiDB>("bodhi", 1, {
-      upgrade(db) {
-        const noteStore = db.createObjectStore("notes", { keyPath: "id" });
-        noteStore.createIndex("by-updated", "updated_at");
+    dbPromise = openDB<BodhiDB>("bodhi", 3, {
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
+          const noteStore = db.createObjectStore("notes", { keyPath: "id" });
+          noteStore.createIndex("by-updated", "updated_at");
 
-        const tagStore = db.createObjectStore("note_tags", { autoIncrement: true });
-        tagStore.createIndex("by-note", "note_id");
+          const tagStore = db.createObjectStore("note_tags", { autoIncrement: true });
+          tagStore.createIndex("by-note", "note_id");
+        }
+        if (oldVersion < 2) {
+          if (!db.objectStoreNames.contains("deletions")) {
+            db.createObjectStore("deletions", { keyPath: "note_id" });
+          }
+        }
+        if (oldVersion < 3) {
+          if (!db.objectStoreNames.contains("settings")) {
+            db.createObjectStore("settings", { keyPath: "key" });
+          }
+        }
       },
     });
   }
@@ -62,7 +83,8 @@ export async function createNote(body?: string, tags?: string[]): Promise<Note> 
   const timestamp = now();
   const noteBody = body ?? "";
   const noteTags = tags ?? [];
-  const row: NoteRow = { id, title: "", body: noteBody, created_at: timestamp, updated_at: timestamp };
+  const crdtState = createNoteDoc("", noteBody, noteTags, timestamp, timestamp);
+  const row: NoteRow = { id, title: "", body: noteBody, created_at: timestamp, updated_at: timestamp, crdt_state: crdtState };
   const tx = db.transaction(["notes", "note_tags"], "readwrite");
   await tx.objectStore("notes").put(row);
   const tagStore = tx.objectStore("note_tags");
@@ -77,17 +99,24 @@ export async function updateNote(id: string, title: string, body: string): Promi
   const db = await getDb();
   const existing = await db.get("notes", id);
   if (!existing) return;
+  const timestamp = now();
+  const tags = await getTagsForNote(db, id);
+  if (existing.crdt_state) {
+    existing.crdt_state = updateNoteDoc(existing.crdt_state, title, body, tags, timestamp);
+  } else {
+    existing.crdt_state = createNoteDoc(title, body, tags, existing.created_at, timestamp);
+  }
   existing.title = title;
   existing.body = body;
-  existing.updated_at = now();
+  existing.updated_at = timestamp;
   await db.put("notes", existing);
 }
 
 export async function deleteNote(id: string): Promise<void> {
   const db = await getDb();
-  const tx = db.transaction(["notes", "note_tags"], "readwrite");
+  const tx = db.transaction(["notes", "note_tags", "deletions"], "readwrite");
+  await tx.objectStore("deletions").put({ note_id: id, deleted_at: now() });
   await tx.objectStore("notes").delete(id);
-  // Delete all tags for this note
   const tagStore = tx.objectStore("note_tags");
   const tagIndex = tagStore.index("by-note");
   let cursor = await tagIndex.openCursor(id);
@@ -100,16 +129,26 @@ export async function deleteNote(id: string): Promise<void> {
 
 export async function setNoteTags(noteId: string, tags: string[]): Promise<void> {
   const db = await getDb();
+  const timestamp = now();
+  // Update CRDT state with new tags
+  const existing = await db.get("notes", noteId);
+  if (existing) {
+    if (existing.crdt_state) {
+      existing.crdt_state = updateNoteDoc(existing.crdt_state, existing.title, existing.body, tags, timestamp);
+    } else {
+      existing.crdt_state = createNoteDoc(existing.title, existing.body, tags, existing.created_at, timestamp);
+    }
+    existing.updated_at = timestamp;
+    await db.put("notes", existing);
+  }
   const tx = db.transaction("note_tags", "readwrite");
   const store = tx.objectStore("note_tags");
   const index = store.index("by-note");
-  // Delete existing tags for this note
   let cursor = await index.openCursor(noteId);
   while (cursor) {
     await cursor.delete();
     cursor = await cursor.continue();
   }
-  // Insert new tags
   for (const tag of tags) {
     await store.put({ note_id: noteId, tag: tag.trim().toLowerCase() });
   }
@@ -146,4 +185,70 @@ export async function searchNotes(query: string, filterTag: string | null): Prom
     notes.push({ ...row, tags });
   }
   return notes;
+}
+
+export async function getAllNotesWithCrdt(): Promise<Array<{ id: string; crdt_state: Uint8Array | null }>> {
+  const db = await getDb();
+  const rows = await db.getAll("notes");
+  return rows.map((r) => ({
+    id: r.id,
+    crdt_state: r.crdt_state ?? null,
+  }));
+}
+
+export async function getAllDeletions(): Promise<DeletionRecord[]> {
+  const db = await getDb();
+  return db.getAll("deletions");
+}
+
+export async function applySyncedNote(
+  id: string, title: string, body: string, tags: string[],
+  created_at: string, updated_at: string, crdt_state: Uint8Array
+): Promise<void> {
+  const db = await getDb();
+  const row: NoteRow = { id, title, body, created_at, updated_at, crdt_state };
+  const tx = db.transaction(["notes", "note_tags"], "readwrite");
+  await tx.objectStore("notes").put(row);
+  const tagStore = tx.objectStore("note_tags");
+  const tagIndex = tagStore.index("by-note");
+  let cursor = await tagIndex.openCursor(id);
+  while (cursor) {
+    await cursor.delete();
+    cursor = await cursor.continue();
+  }
+  for (const tag of tags) {
+    await tagStore.put({ note_id: id, tag: tag.trim().toLowerCase() });
+  }
+  await tx.done;
+}
+
+export async function applyDeletion(noteId: string, deletedAt: string): Promise<void> {
+  const db = await getDb();
+  const tx = db.transaction(["notes", "note_tags", "deletions"], "readwrite");
+  await tx.objectStore("deletions").put({ note_id: noteId, deleted_at: deletedAt });
+  await tx.objectStore("notes").delete(noteId);
+  const tagStore = tx.objectStore("note_tags");
+  const tagIndex = tagStore.index("by-note");
+  let cursor = await tagIndex.openCursor(noteId);
+  while (cursor) {
+    await cursor.delete();
+    cursor = await cursor.continue();
+  }
+  await tx.done;
+}
+
+export async function getSetting(key: string): Promise<string | null> {
+  const db = await getDb();
+  const row = await db.get("settings", key);
+  return row?.value ?? null;
+}
+
+export async function setSetting(key: string, value: string): Promise<void> {
+  const db = await getDb();
+  await db.put("settings", { key, value });
+}
+
+export async function deleteSetting(key: string): Promise<void> {
+  const db = await getDb();
+  await db.delete("settings", key);
 }

@@ -10,6 +10,9 @@ import { PrivacyPanel } from "./components/PrivacyPanel";
 import { EnsoLoader } from "./components/EnsoLoader";
 import { InkDivider } from "./components/InkDivider";
 import { DailyTeaching } from "./components/DailyTeaching";
+import { SyncButton } from "./components/SyncButton";
+import { IS_TAURI, IS_PWA, IS_SYNC } from "./lib/env";
+import * as db from "./lib/db";
 
 type MobileView = "list" | "editor";
 
@@ -19,10 +22,34 @@ export default function App() {
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [mobileView, setMobileView] = useState<MobileView>("list");
   const [focusMode, setFocusMode] = useState(false);
+  const [isPaired, setIsPaired] = useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const pendingTiptapContent = useRef<Record<string, unknown> | null>(null);
 
   const displayNotes = search.results ?? notes.notes;
+
+  // Load pairing state from settings (phone PWA only)
+  useEffect(() => {
+    if (!IS_PWA || IS_SYNC) return;
+    (async () => {
+      const saved = await db.getSetting("sync-server-url");
+      if (saved) setIsPaired(true);
+    })();
+  }, []);
+
+  // Listen for sync-completed events from Tauri (desktop refreshes after phone syncs)
+  useEffect(() => {
+    if (!IS_TAURI) return;
+    let unlisten: (() => void) | undefined;
+    (async () => {
+      const { listen } = await import("@tauri-apps/api/event");
+      unlisten = await listen("sync-completed", () => {
+        notes.loadNotes();
+        search.refreshTags();
+      });
+    })();
+    return () => { unlisten?.(); };
+  }, [notes, search]);
 
   // Focus mode: F key toggles (only when not typing in an input)
   useEffect(() => {
@@ -82,6 +109,11 @@ export default function App() {
     setMobileView("list");
   }, []);
 
+  const handleSyncComplete = useCallback(() => {
+    notes.loadNotes();
+    search.refreshTags();
+  }, [notes, search]);
+
   if (notes.loading) {
     return <EnsoLoader />;
   }
@@ -99,13 +131,16 @@ export default function App() {
       <div className={sidebarClass}>
         <div className="sidebar-header">
           <h1 className="app-title">Bodhi</h1>
-          <button
-            className="btn-privacy"
-            onClick={() => setShowPrivacy(true)}
-            title="Privacy info"
-          >
-            &#x1f6e1;
-          </button>
+          <div className="sidebar-header-actions">
+            <SyncButton onSyncComplete={handleSyncComplete} paired={isPaired} />
+            <button
+              className="btn-privacy"
+              onClick={() => setShowPrivacy(true)}
+              title="Privacy info"
+            >
+              &#x1f6e1;
+            </button>
+          </div>
         </div>
         <SearchBar
           query={search.query}
@@ -153,7 +188,12 @@ export default function App() {
           </button>
         )}
       </div>
-      {showPrivacy && <PrivacyPanel onClose={() => setShowPrivacy(false)} />}
+      {showPrivacy && (
+        <PrivacyPanel
+          onClose={() => setShowPrivacy(false)}
+          onPairingChanged={setIsPaired}
+        />
+      )}
     </div>
   );
 }

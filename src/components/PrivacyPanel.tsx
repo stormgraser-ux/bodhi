@@ -1,10 +1,12 @@
 import { UpdateChecker } from "./UpdateChecker";
+import { PairingPanel } from "./PairingPanel";
 
 interface PrivacyPanelProps {
   onClose: () => void;
+  onPairingChanged?: (paired: boolean) => void;
 }
 
-export function PrivacyPanel({ onClose }: PrivacyPanelProps) {
+export function PrivacyPanel({ onClose, onPairingChanged }: PrivacyPanelProps) {
   return (
     <div className="confirm-overlay" onClick={onClose}>
       <div className="privacy-panel" onClick={(e) => e.stopPropagation()}>
@@ -59,6 +61,7 @@ export function PrivacyPanel({ onClose }: PrivacyPanelProps) {
             </ol>
           </div>
 
+          <PairingPanel onPaired={onPairingChanged} />
           <UpdateChecker />
         </div>
       </div>
