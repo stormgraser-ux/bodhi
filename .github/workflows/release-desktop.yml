@@ -33,7 +33,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Build sync PWA for bundling
-        run: pnpm build:sync-pwa
+        shell: bash
+        env:
+          VITE_BUILD_TARGET: sync
+        run: pnpm exec tsc && pnpm exec vite build
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
