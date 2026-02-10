@@ -626,29 +626,29 @@ body {
 
 /* Typography inside editor */
 .tiptap h1 {
-  font-size: 1.8em;
+  font-size: 2em;
   font-weight: 300;
-  margin: 0.8em 0 0.4em;
+  margin: 1em 0 0.5em;
   letter-spacing: 0.5px;
   color: var(--accent);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3em;
 }
 
 .tiptap h2 {
-  font-size: 1.35em;
-  font-weight: 600;
-  margin: 0.7em 0 0.3em;
-  letter-spacing: 0.3px;
-  color: var(--text);
+  font-size: 1.5em;
+  font-weight: 700;
+  margin: 1em 0 0.4em;
+  color: var(--accent);
 }
 
 .tiptap h3 {
-  font-size: 1.05em;
+  font-size: 1.1em;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.2px;
-  margin: 0.7em 0 0.3em;
+  letter-spacing: 1px;
+  margin: 0.8em 0 0.3em;
   color: var(--text-secondary);
-  font-size: 0.8em;
 }
 
 .tiptap p {
