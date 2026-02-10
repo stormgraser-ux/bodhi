@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import type { Note } from "../types/note";
 import { NoteListItem } from "./NoteListItem";
-import { NOTE_PRESETS, getPresetBody } from "../data/note-presets";
+import { NOTE_PRESETS, getPresetBody, getPresetTiptapContent } from "../data/note-presets";
 
 interface NoteListProps {
   notes: Note[];
   selectedId: string | null;
   onSelect: (id: string) => void;
-  onCreate: (body?: string, tags?: string[]) => void;
+  onCreate: (body?: string, tags?: string[], tiptapContent?: Record<string, unknown>) => void;
 }
 
 export function NoteList({ notes, selectedId, onSelect, onCreate }: NoteListProps) {
@@ -29,7 +29,8 @@ export function NoteList({ notes, selectedId, onSelect, onCreate }: NoteListProp
     const preset = NOTE_PRESETS.find((p) => p.id === presetId);
     if (!preset) return;
     const body = getPresetBody(preset);
-    onCreate(body || undefined, preset.tag ? [preset.tag] : undefined);
+    const tiptapContent = getPresetTiptapContent(preset);
+    onCreate(body || undefined, preset.tag ? [preset.tag] : undefined, tiptapContent);
     setShowPresets(false);
   };
 

@@ -16,9 +16,11 @@ interface NoteEditorProps {
   onDelete: (id: string) => void;
   onTagsChange: (id: string, tags: string[]) => void;
   onBack?: () => void;
+  initialTiptapContent?: Record<string, unknown>;
+  onTiptapContentConsumed?: () => void;
 }
 
-export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBack }: NoteEditorProps) {
+export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBack, initialTiptapContent, onTiptapContentConsumed }: NoteEditorProps) {
   const [title, setTitle] = useState(note.title);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSaveDot, setShowSaveDot] = useState(false);
@@ -57,9 +59,13 @@ export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBa
     ],
     content: note.body,
     onCreate: ({ editor: ed }) => {
-      // Safety net: if onBeforeCreate didn't parse the markdown correctly,
-      // explicitly re-parse using ProseMirror's DOMParser
-      if (note.body) {
+      // If we have native TipTap JSON content (from presets), use it directly
+      // This bypasses tiptap-markdown's parse pipeline entirely
+      if (initialTiptapContent) {
+        ed.commands.setContent(initialTiptapContent);
+        onTiptapContentConsumed?.();
+      } else if (note.body) {
+        // Safety net: re-parse markdown through ProseMirror's DOMParser
         setDocFromMarkdown(ed, note.body);
       }
     },

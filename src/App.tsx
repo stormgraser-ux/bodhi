@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useNotes } from "./hooks/useNotes";
 import { useSearch } from "./hooks/useSearch";
 import { useMediaQuery } from "./hooks/useMediaQuery";
@@ -20,6 +20,7 @@ export default function App() {
   const [mobileView, setMobileView] = useState<MobileView>("list");
   const [focusMode, setFocusMode] = useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const pendingTiptapContent = useRef<Record<string, unknown> | null>(null);
 
   const displayNotes = search.results ?? notes.notes;
 
@@ -44,7 +45,8 @@ export default function App() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isMobile, focusMode]);
 
-  const handleCreate = useCallback(async (body?: string, tags?: string[]) => {
+  const handleCreate = useCallback(async (body?: string, tags?: string[], tiptapContent?: Record<string, unknown>) => {
+    pendingTiptapContent.current = tiptapContent ?? null;
     search.clearSearch();
     await notes.createNote(body, tags);
     search.refreshTags();
@@ -133,6 +135,8 @@ export default function App() {
             onDelete={handleDelete}
             onTagsChange={handleTagsChange}
             onBack={isMobile ? handleBack : undefined}
+            initialTiptapContent={pendingTiptapContent.current ?? undefined}
+            onTiptapContentConsumed={() => { pendingTiptapContent.current = null; }}
           />
         ) : (
           <div className="editor-empty">
