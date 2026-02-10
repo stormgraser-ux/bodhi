@@ -8,7 +8,10 @@
 @tauri-apps/plugin-updater
 @types/react
 @types/react-dom
-@uiw/react-md-editor
+@tiptap/pm
+@tiptap/react
+@tiptap/starter-kit
+tiptap-markdown
 @vitejs/plugin-react
 idb
 react

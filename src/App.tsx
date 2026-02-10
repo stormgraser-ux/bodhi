@@ -29,8 +29,8 @@ export default function App() {
       if (isMobile) return;
       const tag = (e.target as HTMLElement).tagName;
       if (tag === "INPUT" || tag === "TEXTAREA") return;
-      // Also skip if inside the markdown editor
-      if ((e.target as HTMLElement).closest(".w-md-editor")) return;
+      // Also skip if inside the TipTap editor
+      if ((e.target as HTMLElement).closest(".tiptap")) return;
 
       if (e.key === "f" || e.key === "F") {
         e.preventDefault();

@@ -7,7 +7,7 @@ A fully functional privacy-first desktop note-taking app using Tauri v2 + React 
 ### Features Implemented
 - **Note CRUD** — Create, read, update, delete notes
 - **Auto-save** — Title, body, and tags save automatically (1s debounce for text, on-blur for tags)
-- **Markdown editor** — Live split preview using @uiw/react-md-editor
+- **WYSIWYG editor** — TipTap rich-text editor with markdown storage (tiptap-markdown)
 - **Tags** — Add/remove tags per note, tag autocomplete from existing tags, filter notes by tag
 - **Search** — Full-text search across title and body, combines with tag filter (AND logic)
 - **Privacy panel** — Shield icon opens modal explaining all privacy guarantees + self-verification steps
@@ -27,7 +27,7 @@ A fully functional privacy-first desktop note-taking app using Tauri v2 + React 
 | Package manager | pnpm |
 | Database | tauri-plugin-sql (SQLite) |
 | State management | React useReducer |
-| Markdown editor | @uiw/react-md-editor |
+| WYSIWYG editor | TipTap (@tiptap/react + tiptap-markdown) |
 | Fonts | System font stack |
 
 ## Key Files

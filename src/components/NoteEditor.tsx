@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import MDEditor from "@uiw/react-md-editor";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { Markdown } from "tiptap-markdown";
 import type { Note } from "../types/note";
 import { TagInput } from "./TagInput";
-import { useMediaQuery } from "../hooks/useMediaQuery";
 import { spawnLeaf } from "../lib/leaf";
 
 interface NoteEditorProps {
@@ -16,28 +17,45 @@ interface NoteEditorProps {
 
 export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBack }: NoteEditorProps) {
   const [title, setTitle] = useState(note.title);
-  const [body, setBody] = useState(note.body);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSaveDot, setShowSaveDot] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const noteIdRef = useRef(note.id);
   const releaseBtnRef = useRef<HTMLButtonElement | null>(null);
-  const isMobile = useMediaQuery("(max-width: 768px)");
 
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Markdown.configure({
+        html: false,
+        transformPastedText: true,
+        transformCopiedText: true,
+      }),
+    ],
+    content: note.body,
+    onUpdate: ({ editor }) => {
+      const md = (editor.storage as any).markdown.getMarkdown() as string;
+      save(title, md);
+    },
+  });
+
+  // Sync editor content when note changes (switching notes)
   useEffect(() => {
     if (noteIdRef.current !== note.id) {
       noteIdRef.current = note.id;
       setTitle(note.title);
-      setBody(note.body);
+      if (editor) {
+        const parsed = (editor.storage as any).markdown.parser.parse(note.body);
+        editor.commands.setContent(parsed);
+      }
     }
-  }, [note.id, note.title, note.body]);
+  }, [note.id, note.title, note.body, editor]);
 
   const save = useCallback(
     (t: string, b: string) => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
         onSave(note.id, t, b);
-        // Gold dot presence
         setShowSaveDot(true);
         setTimeout(() => setShowSaveDot(false), 1800);
       }, 1000);
@@ -54,24 +72,19 @@ export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBa
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setTitle(val);
-    save(val, body);
-  };
-
-  const handleBodyChange = (val: string | undefined) => {
-    const newBody = val ?? "";
-    setBody(newBody);
-    save(title, newBody);
+    const md = editor ? ((editor.storage as any).markdown.getMarkdown() as string) : "";
+    save(val, md);
   };
 
   const handleRelease = () => {
-    // Spawn falling leaf from the button
     if (releaseBtnRef.current) {
       spawnLeaf(releaseBtnRef.current);
     }
     setShowDeleteConfirm(false);
-    // Brief pause so the leaf is visible before the note disappears
     setTimeout(() => onDelete(note.id), 300);
   };
+
+  if (!editor) return null;
 
   return (
     <div className="note-editor">
@@ -105,15 +118,82 @@ export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBa
           onChange={(tags) => onTagsChange(note.id, tags)}
         />
       </div>
-      <div className="editor-body" data-color-mode="light">
-        <MDEditor
-          value={body}
-          onChange={handleBodyChange}
-          preview="edit"
-          height="100%"
-          visibleDragbar={false}
-          hideToolbar={isMobile}
-        />
+      <div className="editor-body">
+        <div className="tiptap-toolbar">
+          <button
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={editor.isActive("bold") ? "is-active" : ""}
+            title="Bold"
+          >
+            B
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            className={editor.isActive("italic") ? "is-active" : ""}
+            title="Italic"
+          >
+            I
+          </button>
+          <span className="toolbar-divider" />
+          <button
+            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+            className={editor.isActive("heading", { level: 1 }) ? "is-active" : ""}
+            title="Heading 1"
+          >
+            H1
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            className={editor.isActive("heading", { level: 2 }) ? "is-active" : ""}
+            title="Heading 2"
+          >
+            H2
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            className={editor.isActive("heading", { level: 3 }) ? "is-active" : ""}
+            title="Heading 3"
+          >
+            H3
+          </button>
+          <span className="toolbar-divider" />
+          <button
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            className={editor.isActive("bulletList") ? "is-active" : ""}
+            title="Bullet list"
+          >
+            &bull;
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            className={editor.isActive("orderedList") ? "is-active" : ""}
+            title="Numbered list"
+          >
+            1.
+          </button>
+          <span className="toolbar-divider" />
+          <button
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            className={editor.isActive("blockquote") ? "is-active" : ""}
+            title="Blockquote"
+          >
+            &ldquo;
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleCode().run()}
+            className={editor.isActive("code") ? "is-active" : ""}
+            title="Inline code"
+          >
+            &lt;/&gt;
+          </button>
+          <button
+            onClick={() => editor.chain().focus().setHorizontalRule().run()}
+            title="Horizontal rule"
+          >
+            &#8212;
+          </button>
+        </div>
+        <EditorContent editor={editor} />
       </div>
       {showDeleteConfirm && (
         <div className="confirm-overlay" onClick={() => setShowDeleteConfirm(false)}>
