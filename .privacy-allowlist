@@ -10,6 +10,8 @@
 @types/react-dom
 @tiptap/pm
 @tiptap/react
+@tiptap/extension-task-item
+@tiptap/extension-task-list
 @tiptap/starter-kit
 tiptap-markdown
 @vitejs/plugin-react

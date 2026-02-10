@@ -56,13 +56,21 @@ export async function getAllNotes(): Promise<Note[]> {
   return notes;
 }
 
-export async function createNote(): Promise<Note> {
+export async function createNote(body?: string, tags?: string[]): Promise<Note> {
   const db = await getDb();
   const id = uuid();
   const timestamp = now();
-  const row: NoteRow = { id, title: "", body: "", created_at: timestamp, updated_at: timestamp };
-  await db.put("notes", row);
-  return { ...row, tags: [] };
+  const noteBody = body ?? "";
+  const noteTags = tags ?? [];
+  const row: NoteRow = { id, title: "", body: noteBody, created_at: timestamp, updated_at: timestamp };
+  const tx = db.transaction(["notes", "note_tags"], "readwrite");
+  await tx.objectStore("notes").put(row);
+  const tagStore = tx.objectStore("note_tags");
+  for (const tag of noteTags) {
+    await tagStore.put({ note_id: id, tag: tag.trim().toLowerCase() });
+  }
+  await tx.done;
+  return { ...row, tags: noteTags };
 }
 
 export async function updateNote(id: string, title: string, body: string): Promise<void> {

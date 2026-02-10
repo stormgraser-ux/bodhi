@@ -79,8 +79,8 @@ export function useNotes() {
     loadNotes();
   }, [loadNotes]);
 
-  const createNote = useCallback(async () => {
-    const note = await db.createNote();
+  const createNote = useCallback(async (body?: string, tags?: string[]) => {
+    const note = await db.createNote(body, tags);
     dispatch({ type: "ADD_NOTE", note });
   }, []);
 

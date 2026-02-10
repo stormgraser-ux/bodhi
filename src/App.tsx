@@ -44,9 +44,9 @@ export default function App() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isMobile, focusMode]);
 
-  const handleCreate = useCallback(async () => {
+  const handleCreate = useCallback(async (body?: string, tags?: string[]) => {
     search.clearSearch();
-    await notes.createNote();
+    await notes.createNote(body, tags);
     search.refreshTags();
     if (isMobile) setMobileView("editor");
   }, [notes, search, isMobile]);

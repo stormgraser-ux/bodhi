@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
 import { Markdown } from "tiptap-markdown";
 import type { Note } from "../types/note";
 import { TagInput } from "./TagInput";
@@ -26,6 +28,8 @@ export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBa
   const editor = useEditor({
     extensions: [
       StarterKit,
+      TaskList,
+      TaskItem.configure({ nested: true }),
       Markdown.configure({
         html: false,
         transformPastedText: true,
@@ -170,6 +174,13 @@ export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBa
             title="Numbered list"
           >
             1.
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleTaskList().run()}
+            className={editor.isActive("taskList") ? "is-active" : ""}
+            title="Task list"
+          >
+            &#x2611;
           </button>
           <span className="toolbar-divider" />
           <button

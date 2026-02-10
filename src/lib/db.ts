@@ -3,7 +3,7 @@ import type { Note } from "../types/note";
 
 interface DbBackend {
   getAllNotes(): Promise<Note[]>;
-  createNote(): Promise<Note>;
+  createNote(body?: string, tags?: string[]): Promise<Note>;
   updateNote(id: string, title: string, body: string): Promise<void>;
   deleteNote(id: string): Promise<void>;
   setNoteTags(noteId: string, tags: string[]): Promise<void>;
@@ -28,8 +28,8 @@ export async function getAllNotes(): Promise<Note[]> {
   return (await getBackend()).getAllNotes();
 }
 
-export async function createNote(): Promise<Note> {
-  return (await getBackend()).createNote();
+export async function createNote(body?: string, tags?: string[]): Promise<Note> {
+  return (await getBackend()).createNote(body, tags);
 }
 
 export async function updateNote(id: string, title: string, body: string): Promise<void> {

@@ -34,15 +34,23 @@ export async function getAllNotes(): Promise<Note[]> {
   return notes;
 }
 
-export async function createNote(): Promise<Note> {
+export async function createNote(body?: string, tags?: string[]): Promise<Note> {
   const conn = await getDb();
   const id = uuid();
   const timestamp = now();
+  const noteBody = body ?? "";
   await conn.execute(
     "INSERT INTO notes (id, title, body, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
-    [id, "", "", timestamp, timestamp]
+    [id, "", noteBody, timestamp, timestamp]
   );
-  return { id, title: "", body: "", created_at: timestamp, updated_at: timestamp, tags: [] };
+  const noteTags = tags ?? [];
+  for (const tag of noteTags) {
+    await conn.execute(
+      "INSERT INTO note_tags (note_id, tag) VALUES (?, ?)",
+      [id, tag.trim().toLowerCase()]
+    );
+  }
+  return { id, title: "", body: noteBody, created_at: timestamp, updated_at: timestamp, tags: noteTags };
 }
 
 export async function updateNote(id: string, title: string, body: string): Promise<void> {
