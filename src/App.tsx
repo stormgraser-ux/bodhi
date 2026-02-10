@@ -12,6 +12,7 @@ import { InkDivider } from "./components/InkDivider";
 import { DailyTeaching } from "./components/DailyTeaching";
 import { SyncButton } from "./components/SyncButton";
 import { IS_TAURI, IS_PWA, IS_SYNC } from "./lib/env";
+import { performSync, getSyncBaseUrl } from "./lib/sync-client";
 import * as db from "./lib/db";
 
 type MobileView = "list" | "editor";
@@ -113,6 +114,36 @@ export default function App() {
     notes.loadNotes();
     search.refreshTags();
   }, [notes, search]);
+
+  // Auto-sync on app focus (phone PWA only)
+  useEffect(() => {
+    if (!IS_PWA && !IS_SYNC) return;
+
+    let lastSync = 0;
+    const COOLDOWN = 30_000; // 30s minimum between auto-syncs
+
+    function trySync() {
+      if (document.hidden) return;
+      if (Date.now() - lastSync < COOLDOWN) return;
+      // GitHub Pages PWA: only sync if paired (URL configured)
+      if (!IS_SYNC && !getSyncBaseUrl()) return;
+
+      lastSync = Date.now();
+      performSync()
+        .then(() => handleSyncComplete())
+        .catch(() => {}); // Silent fail — auto-sync is best-effort
+    }
+
+    // Sync when app regains focus
+    document.addEventListener("visibilitychange", trySync);
+    // Initial sync after short delay (let SyncButton load the URL first)
+    const timer = setTimeout(trySync, 1000);
+
+    return () => {
+      document.removeEventListener("visibilitychange", trySync);
+      clearTimeout(timer);
+    };
+  }, [handleSyncComplete]);
 
   if (notes.loading) {
     return <EnsoLoader />;
