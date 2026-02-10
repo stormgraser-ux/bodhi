@@ -1,83 +1,106 @@
 # Bodhi — Handoff Document
 
-## What Was Built (Phase 1 — Foundation)
+## Current State (v0.2.0)
 
-A fully functional privacy-first desktop note-taking app using Tauri v2 + React + TypeScript.
+All core development is complete. The app is deployed and distributed:
 
-### Features Implemented
-- **Note CRUD** — Create, read, update, delete notes
-- **Auto-save** — Title, body, and tags save automatically (1s debounce for text, on-blur for tags)
-- **WYSIWYG editor** — TipTap rich-text editor with markdown storage (tiptap-markdown)
-- **Tags** — Add/remove tags per note, tag autocomplete from existing tags, filter notes by tag
-- **Search** — Full-text search across title and body, combines with tag filter (AND logic)
-- **Privacy panel** — Shield icon opens modal explaining all privacy guarantees + self-verification steps
-- **CSP lockdown** — Content Security Policy blocks ALL external network connections
-- **SQLite persistence** — Notes survive app restarts, stored in local bodhi.db
+- **Desktop app** — macOS (universal) + Windows installers on [GitHub Releases](https://github.com/stormgraser-ux/bodhi/releases)
+- **Phone PWA** — Live at [stormgraser-ux.github.io/bodhi](https://stormgraser-ux.github.io/bodhi/)
+- **WiFi sync** — Desktop runs embedded sync server, phone syncs over LAN
+- **Auto-updater** — Desktop checks GitHub Releases for updates (user-initiated via shield panel)
 
-### Privacy Proofs (Screenshot-able)
-1. **DevTools Network tab** — zero external requests during full CRUD cycle
-2. **Offline test** — disconnect internet, app works perfectly
-3. **CSP block** — `fetch("https://example.com")` in console shows "Refused to connect"
+## What Was Built
 
-## Tech Stack
-| Layer | Choice |
-|-------|--------|
-| Desktop shell | Tauri v2 |
-| Frontend | React 19 + TypeScript + Vite |
-| Package manager | pnpm |
-| Database | tauri-plugin-sql (SQLite) |
-| State management | React useReducer |
-| WYSIWYG editor | TipTap (@tiptap/react + tiptap-markdown) |
-| Fonts | System font stack |
+### Phase 1: Foundation
+- Note CRUD with auto-save (1s debounce)
+- TipTap rich-text editor with markdown storage
+- Tags with autocomplete, search with tag filter (AND logic)
+- Privacy panel with verification steps
+- CSP lockdown blocking all external connections
+- SQLite persistence (Tauri desktop)
 
-## Key Files
-| File | Purpose |
-|------|---------|
-| `src/lib/db.ts` | All SQL queries in one file (designed for Phase 3 CRDT swap) |
-| `src/hooks/useNotes.ts` | Note state management (CRUD + tags) |
-| `src/hooks/useSearch.ts` | Search + tag filter logic |
-| `src/App.tsx` | Main two-panel layout |
-| `src/components/NoteEditor.tsx` | Markdown editor with auto-save |
-| `src/components/TagInput.tsx` | Tag input with autocomplete + blur-save |
-| `src/components/PrivacyPanel.tsx` | Privacy guarantees modal |
-| `src-tauri/src/lib.rs` | Rust backend — plugin registration + DB migrations |
-| `src-tauri/tauri.conf.json` | CSP lockdown + window config |
-| `src-tauri/capabilities/default.json` | SQL plugin permissions |
+### Phase 1.5: PWA
+- IndexedDB storage backend for browser/phone
+- Storage abstraction layer (SQLite or IndexedDB, same API)
+- Mobile-responsive layout (768px breakpoint, list-or-editor toggle)
+- Service worker for offline support
+- iOS safe-area insets, 16px input font (prevents auto-zoom)
 
-## How to Run
-```bash
-cd ~/workspace/projects/Bodhi && pnpm tauri dev
-```
-First Rust build takes ~1.5 min. Subsequent builds are fast.
-
-## Build Notes
-- Rust must be on PATH: `export PATH="$HOME/.cargo/bin:$PATH"`
-- `pnpm create tauri-app` / `pnpm tauri init` fail in non-TTY — project was scaffolded manually
-- Tauri v2: `app.title` is NOT valid in config — title goes in window config only
-- Identifier must not end in `.app` (conflicts with macOS bundle extension)
-- React 19: `useRef()` requires explicit initial value — use `useRef<T | null>(null)`
-- Migration SQL is hashed — never modify an already-applied migration, add new versions instead
-
-## What's Next
-
-### Phase 2: Design (Buddhist Theming)
-- Color palette: aged paper, moss green, stone gray, deep burgundy, gold leaf
-- Typography: serif headings, clean sans body
-- Textures: paper grain, ink wash backgrounds
-- Slow breathing transitions
+### Phase 2: Design
+- Temple Garden theme (aged paper, moss green, burgundy, gold leaf)
 - Enso circle loading animation
-- "Temple Garden" atmosphere
+- Bodhi leaf icons, mindful language throughout
+- Note presets (Daily Reflection, Gratitude Practice, Walking Meditation, etc.)
+- Focus mode (press F on desktop to hide sidebar)
 
 ### Phase 3: Sync
-- CRDT integration (Automerge) — only `db.ts` needs to change
-- Desktop sync server embedded in Tauri (port 8108)
-- mDNS discovery on phone
-- Delta sync protocol
-- Lotus breathing animation during sync
+- Automerge CRDT per note (conflict-free merging)
+- Axum HTTP server embedded in Tauri (port 8108)
+- Phone pairing: enter desktop IP, validated as private range
+- QR code display on desktop (zero-dependency SVG generator)
+- Delta sync protocol with deletion tombstones
+- Manual sync (button press) — no auto-sync
+- Sync PWA bundled in desktop app for same-origin access
 
-### Phase 4: Polish & Ship
-- Encryption at rest (both platforms)
-- App icon and splash screen (enso circle)
-- App Store metadata and screenshots
-- Desktop installer bundles
-- Handoff documentation for gift recipient
+### Distribution
+- GitHub Actions: PWA auto-deploys on push to master
+- GitHub Actions: Desktop builds on version tag push
+- Tauri updater with `latest.json` for in-app updates
+- Signing key configured for update verification
+
+## Tech Stack
+
+| Layer | Choice |
+|-------|--------|
+| Desktop shell | Tauri v2 (Rust backend) |
+| Frontend | React 19 + TypeScript + Vite |
+| Package manager | pnpm |
+| Desktop DB | tauri-plugin-sql (SQLite) |
+| Phone DB | IndexedDB (via `idb`) |
+| CRDT | Automerge (JS + Rust) |
+| Sync server | axum + rusqlite + tower-http |
+| Editor | TipTap (@tiptap/react + tiptap-markdown) |
+| Fonts | System font stack (zero external requests) |
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/lib/db.ts` | Storage router (SQLite or IndexedDB) |
+| `src/lib/db-sqlite.ts` | Tauri SQLite backend with CRDT |
+| `src/lib/db-indexeddb.ts` | PWA IndexedDB backend with CRDT |
+| `src/lib/crdt.ts` | Automerge CRDT wrapper |
+| `src/lib/sync-client.ts` | HTTP sync client for phone |
+| `src/lib/env.ts` | Platform detection flags |
+| `src/lib/private-ip.ts` | Private IP validation |
+| `src/lib/qr.ts` | QR code SVG generator |
+| `src/components/PairingPanel.tsx` | Desktop QR/IP + Phone IP entry |
+| `src/components/SyncButton.tsx` | Phone sync trigger |
+| `src-tauri/src/sync_server.rs` | Axum sync server + PWA serving |
+| `src-tauri/src/lib.rs` | Tauri setup + migrations + server start |
+| `.github/workflows/deploy-pwa.yml` | GitHub Pages deploy |
+| `.github/workflows/release-desktop.yml` | Desktop release build |
+
+## How to Develop
+
+```bash
+cd ~/workspace/projects/Bodhi
+export PATH="$HOME/.cargo/bin:$PATH"
+pnpm tauri dev          # Desktop app
+pnpm dev:pwa            # PWA (browser, port 5173)
+pnpm build              # TypeScript check + Vite build
+pnpm test               # Privacy self-test (147 checks)
+```
+
+## What's Left (Phase 4 — Recipient's Responsibility)
+
+### Encryption at Rest
+- Notes are stored unencrypted on disk
+- Could use SQLCipher for SQLite, Web Crypto API for IndexedDB
+- Design decision: passphrase-based vs device-key-based
+
+### App Store Submission
+- Code is App Store-ready (no web dependencies, proper bundling)
+- Needs Apple Developer account ($99/year) for Mac App Store
+- Windows Store submission is free
+- App icons and metadata already in place

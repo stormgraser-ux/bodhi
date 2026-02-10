@@ -1,0 +1,91 @@
+Subject: Bodhi — Your Private Note-Taking App
+
+
+Hey!
+
+I built you something. It's called Bodhi — a private note-taking app
+that syncs between your computer and phone over WiFi. No cloud, no
+accounts, no data ever leaving your devices.
+
+Here's how to get set up:
+
+
+DESKTOP (Mac or Windows)
+========================
+
+1. Go to: https://github.com/stormgraser-ux/bodhi/releases/latest
+2. Download the installer for your system:
+   - Mac: Bodhi_0.2.0_universal.dmg — open it, drag Bodhi to Applications
+   - Windows: Bodhi_0.2.0_x64-setup.exe — run the installer
+3. Open Bodhi. That's it — start writing.
+
+
+PHONE (iPhone or Android)
+=========================
+
+1. Open this link on your phone's browser:
+   https://stormgraser-ux.github.io/bodhi/
+
+2. Add it to your home screen:
+   - iPhone: Tap the Share button (box with arrow) > "Add to Home Screen"
+   - Android: Tap the three-dot menu > "Add to Home Screen" or "Install app"
+
+3. Open it from your home screen — it works like a native app, even offline.
+
+
+SYNCING (both devices on the same WiFi)
+========================================
+
+1. Open Bodhi on your computer — it automatically runs a local sync server
+   in the background.
+
+2. On your phone, tap the shield icon (bottom of the sidebar).
+
+3. Your computer shows its IP address and a QR code in the same shield panel.
+   Type that IP address into your phone's pairing screen.
+
+4. Once paired, tap the "Sync" button on your phone whenever you want to
+   sync. Notes merge automatically — no conflicts, no "which version?" dialogs.
+
+Note: Both devices need to be on the same WiFi network. Sync only happens
+when you tap the button — nothing runs in the background.
+
+
+PRIVACY
+=======
+
+This is the part I'm most proud of:
+
+- Zero cloud storage — notes live only on your devices
+- Zero accounts — no sign-up, no login, no email
+- Zero telemetry — the app never contacts any server on the internet
+- Sync is local only — data travels directly between your devices over WiFi
+
+You can verify this yourself:
+- Open DevTools (Cmd+Option+I on Mac, F12 on Windows) > Network tab
+- Use the app normally — you'll see zero external requests
+- Try running fetch("https://example.com") in the console — it'll be blocked
+
+Your thoughts stay with you.
+
+
+UPDATES
+=======
+
+Desktop: Open the shield icon > "Check for Updates" button. If there's
+a new version, it'll download and install automatically.
+
+Phone: Just visit the link again or refresh the app — the PWA updates
+itself.
+
+
+THE CODE
+========
+
+The source code is at: https://github.com/stormgraser-ux/bodhi
+
+If you ever want to submit it to the Mac App Store or Windows Store,
+everything is ready — you'd just need an Apple Developer account ($99/year)
+for the Mac side. The Windows Store is free.
+
+Enjoy it. Write something good.
