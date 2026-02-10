@@ -88,4 +88,6 @@ If you ever want to submit it to the Mac App Store or Windows Store,
 everything is ready — you'd just need an Apple Developer account ($99/year)
 for the Mac side. The Windows Store is free.
 
-Enjoy it. Write something good.
+"The present moment is filled with joy and happiness.
+If you are attentive, you will see it."
+— Thich Nhat Hanh
