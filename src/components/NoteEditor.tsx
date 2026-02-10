@@ -4,6 +4,7 @@ import StarterKit from "@tiptap/starter-kit";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import { Markdown } from "tiptap-markdown";
+import { DOMParser as ProseMirrorDOMParser } from "@tiptap/pm/model";
 import type { Note } from "../types/note";
 import { TagInput } from "./TagInput";
 import { spawnLeaf } from "../lib/leaf";
@@ -25,18 +26,43 @@ export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBa
   const noteIdRef = useRef(note.id);
   const releaseBtnRef = useRef<HTMLButtonElement | null>(null);
 
+  /** Parse markdown string into a ProseMirror doc using the editor's own schema */
+  const parseMarkdown = useCallback((ed: NonNullable<typeof editor>, md: string) => {
+    const html = (ed.storage as any).markdown.parser.parse(md) as string;
+    const el = document.createElement("div");
+    el.innerHTML = html;
+    return ProseMirrorDOMParser.fromSchema(ed.schema).parse(el);
+  }, []);
+
+  /** Replace editor document without double-parsing, skip undo history */
+  const setDocFromMarkdown = useCallback((ed: NonNullable<typeof editor>, md: string) => {
+    const doc = parseMarkdown(ed, md);
+    if (!ed.state.doc.eq(doc)) {
+      const tr = ed.state.tr.replaceWith(0, ed.state.doc.content.size, doc.content);
+      tr.setMeta("addToHistory", false);
+      ed.view.dispatch(tr);
+    }
+  }, [parseMarkdown]);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
       TaskList,
       TaskItem.configure({ nested: true }),
       Markdown.configure({
-        html: false,
+        html: true,
         transformPastedText: true,
         transformCopiedText: true,
       }),
     ],
     content: note.body,
+    onCreate: ({ editor: ed }) => {
+      // Safety net: if onBeforeCreate didn't parse the markdown correctly,
+      // explicitly re-parse using ProseMirror's DOMParser
+      if (note.body) {
+        setDocFromMarkdown(ed, note.body);
+      }
+    },
     onUpdate: ({ editor }) => {
       const md = (editor.storage as any).markdown.getMarkdown() as string;
       save(title, md);
@@ -49,11 +75,10 @@ export function NoteEditor({ note, allTags, onSave, onDelete, onTagsChange, onBa
       noteIdRef.current = note.id;
       setTitle(note.title);
       if (editor) {
-        const parsed = (editor.storage as any).markdown.parser.parse(note.body);
-        editor.commands.setContent(parsed);
+        setDocFromMarkdown(editor, note.body);
       }
     }
-  }, [note.id, note.title, note.body, editor]);
+  }, [note.id, note.title, note.body, editor, setDocFromMarkdown]);
 
   const save = useCallback(
     (t: string, b: string) => {

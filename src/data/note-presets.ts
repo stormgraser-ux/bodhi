@@ -29,7 +29,7 @@ export const NOTE_PRESETS: NotePreset[] = [
     label: "Journal",
     icon: "\u2638",
     tag: "journal",
-    body: "## What is present today?\n\n\n\n## What am I grateful for?\n\n\n\n## What am I setting aside?\n\n",
+    body: "## What is present today?\n\n\u200B\n\n## What am I grateful for?\n\n\u200B\n\n## What am I setting aside?\n\n\u200B\n",
   },
   {
     id: "meeting",
@@ -38,7 +38,7 @@ export const NOTE_PRESETS: NotePreset[] = [
     tag: "meeting",
     body: () => {
       const date = new Date().toLocaleDateString();
-      return `**Date:** ${date}\n\n**Attendees:**\n- \n\n## Discussion\n\n- \n\n## Action Items\n\n- [ ] \u200B\n- [ ] \u200B\n`;
+      return `## ${date}\n\n### Attendees\n\n- \u200B\n\n### Discussion\n\n- \u200B\n\n### Action Items\n\n- [ ] \u200B\n- [ ] \u200B\n`;
     },
   },
   {
@@ -46,6 +46,6 @@ export const NOTE_PRESETS: NotePreset[] = [
     label: "Cornell",
     icon: "\u25A1",
     tag: "cornell",
-    body: "## Topic\n\n\n\n## Cues & Questions\n\n- \n\n## Notes\n\n- \n\n---\n\n## Summary\n\n",
+    body: "## Topic\n\n\u200B\n\n### Cues & Questions\n\n- \u200B\n\n### Notes\n\n- \u200B\n\n---\n\n### Summary\n\n\u200B\n",
   },
 ];
