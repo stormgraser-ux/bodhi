@@ -22,7 +22,7 @@ export const NOTE_PRESETS: NotePreset[] = [
     label: "Checklist",
     icon: "\u2611",
     tag: "checklist",
-    body: "- [ ] \n- [ ] \n- [ ] \n",
+    body: "- [ ] \u200B\n- [ ] \u200B\n- [ ] \u200B\n",
   },
   {
     id: "journal",
@@ -38,7 +38,7 @@ export const NOTE_PRESETS: NotePreset[] = [
     tag: "meeting",
     body: () => {
       const date = new Date().toLocaleDateString();
-      return `**Date:** ${date}\n\n**Attendees:**\n- \n\n## Discussion\n\n- \n\n## Action Items\n\n- [ ] \n- [ ] \n`;
+      return `**Date:** ${date}\n\n**Attendees:**\n- \n\n## Discussion\n\n- \n\n## Action Items\n\n- [ ] \u200B\n- [ ] \u200B\n`;
     },
   },
   {
