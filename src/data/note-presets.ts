@@ -48,6 +48,17 @@ function hr() {
   return { type: "horizontalRule" };
 }
 
+/** Section card: blockquote wrapping a heading label + content area */
+function section(title: string, ...content: Record<string, unknown>[]) {
+  return {
+    type: "blockquote",
+    content: [
+      heading(3, title),
+      ...(content.length ? content : [paragraph()]),
+    ],
+  };
+}
+
 export const NOTE_PRESETS: NotePreset[] = [
   {
     id: "blank",
@@ -73,16 +84,13 @@ export const NOTE_PRESETS: NotePreset[] = [
     label: "Journal",
     icon: "\u2638",
     tag: "journal",
-    body: "## What is present today?\n\n\n\n## What am I grateful for?\n\n\n\n## What am I setting aside?\n\n",
+    body: "> ### What is present today?\n>\n\n> ### What am I grateful for?\n>\n\n> ### What am I setting aside?\n>\n",
     tiptapContent: {
       type: "doc",
       content: [
-        heading(2, "What is present today?"),
-        paragraph(),
-        heading(2, "What am I grateful for?"),
-        paragraph(),
-        heading(2, "What am I setting aside?"),
-        paragraph(),
+        section("What is present today?"),
+        section("What am I grateful for?"),
+        section("What am I setting aside?"),
       ],
     },
   },
@@ -93,7 +101,7 @@ export const NOTE_PRESETS: NotePreset[] = [
     tag: "meeting",
     body: () => {
       const date = new Date().toLocaleDateString();
-      return `## ${date}\n\n### Attendees\n\n- \n\n### Discussion\n\n- \n\n### Action Items\n\n- [ ] \n- [ ] \n`;
+      return `## ${date}\n\n> ### Attendees\n>\n> - \n\n> ### Discussion\n>\n> - \n\n> ### Action Items\n>\n> - [ ] \n> - [ ] \n`;
     },
     tiptapContent: () => {
       const date = new Date().toLocaleDateString();
@@ -101,12 +109,9 @@ export const NOTE_PRESETS: NotePreset[] = [
         type: "doc",
         content: [
           heading(2, date),
-          heading(3, "Attendees"),
-          bulletList(""),
-          heading(3, "Discussion"),
-          bulletList(""),
-          heading(3, "Action Items"),
-          taskList("", ""),
+          section("Attendees", bulletList("")),
+          section("Discussion", bulletList("")),
+          section("Action Items", taskList("", "")),
         ],
       };
     },
@@ -116,19 +121,15 @@ export const NOTE_PRESETS: NotePreset[] = [
     label: "Cornell",
     icon: "\u25A1",
     tag: "cornell",
-    body: "## Topic\n\n\n\n### Cues & Questions\n\n- \n\n### Notes\n\n- \n\n---\n\n### Summary\n\n",
+    body: "> ### Topic\n>\n\n> ### Cues & Questions\n>\n> - \n\n> ### Notes\n>\n> - \n\n---\n\n> ### Summary\n>\n",
     tiptapContent: {
       type: "doc",
       content: [
-        heading(2, "Topic"),
-        paragraph(),
-        heading(3, "Cues & Questions"),
-        bulletList(""),
-        heading(3, "Notes"),
-        bulletList(""),
+        section("Topic"),
+        section("Cues & Questions", bulletList("")),
+        section("Notes", bulletList("")),
         hr(),
-        heading(3, "Summary"),
-        paragraph(),
+        section("Summary"),
       ],
     },
   },

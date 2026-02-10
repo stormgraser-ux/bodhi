@@ -665,12 +665,29 @@ body {
   margin: 0.15em 0;
 }
 
+/* Blockquote as section card */
 .tiptap blockquote {
-  border-left: 3px solid var(--accent);
-  padding-left: 1em;
-  margin: 0.6em 0;
-  color: var(--text-secondary);
-  font-style: italic;
+  border-left: 3px solid var(--accent-gold);
+  padding: 0.8em 1.2em;
+  margin: 0.8em 0;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 0 8px 8px 0;
+  font-style: normal;
+  color: var(--text);
+}
+
+/* Section label: first heading inside a card */
+.tiptap blockquote > h2:first-child,
+.tiptap blockquote > h3:first-child {
+  margin-top: 0;
+  padding-bottom: 0.4em;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.5em;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .tiptap code {
