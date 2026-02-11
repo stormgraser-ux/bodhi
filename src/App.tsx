@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, lazy, Suspense } from "react";
 import { useNotes } from "./hooks/useNotes";
 import { useSearch } from "./hooks/useSearch";
 import { useMediaQuery } from "./hooks/useMediaQuery";
@@ -10,10 +10,13 @@ import { PrivacyPanel } from "./components/PrivacyPanel";
 import { EnsoLoader } from "./components/EnsoLoader";
 import { InkDivider } from "./components/InkDivider";
 import { DailyTeaching } from "./components/DailyTeaching";
-import { SyncButton } from "./components/SyncButton";
 import { IS_TAURI, IS_PWA, IS_SYNC } from "./lib/env";
-import { performSync, getSyncBaseUrl } from "./lib/sync-client";
 import * as db from "./lib/db";
+
+// Lazy-load SyncButton to keep Automerge WASM off the critical path
+const SyncButton = lazy(() =>
+  import("./components/SyncButton").then((m) => ({ default: m.SyncButton }))
+);
 
 type MobileView = "list" | "editor";
 
@@ -115,23 +118,28 @@ export default function App() {
     search.refreshTags();
   }, [notes, search]);
 
-  // Auto-sync on app focus (phone PWA only)
+  // Auto-sync on app focus (phone PWA only) — dynamic import keeps WASM off critical path
   useEffect(() => {
     if (!IS_PWA && !IS_SYNC) return;
 
     let lastSync = 0;
     const COOLDOWN = 30_000; // 30s minimum between auto-syncs
 
-    function trySync() {
+    async function trySync() {
       if (document.hidden) return;
       if (Date.now() - lastSync < COOLDOWN) return;
-      // GitHub Pages PWA: only sync if paired (URL configured)
-      if (!IS_SYNC && !getSyncBaseUrl()) return;
 
-      lastSync = Date.now();
-      performSync()
-        .then(() => handleSyncComplete())
-        .catch(() => {}); // Silent fail — auto-sync is best-effort
+      try {
+        const { performSync, getSyncBaseUrl } = await import("./lib/sync-client");
+        // GitHub Pages PWA: only sync if paired (URL configured)
+        if (!IS_SYNC && !getSyncBaseUrl()) return;
+
+        lastSync = Date.now();
+        await performSync();
+        handleSyncComplete();
+      } catch {
+        // Silent fail — auto-sync is best-effort
+      }
     }
 
     // Sync when app regains focus
@@ -163,7 +171,9 @@ export default function App() {
         <div className="sidebar-header">
           <h1 className="app-title">Bodhi</h1>
           <div className="sidebar-header-actions">
-            <SyncButton onSyncComplete={handleSyncComplete} paired={isPaired} />
+            <Suspense fallback={null}>
+              <SyncButton onSyncComplete={handleSyncComplete} paired={isPaired} />
+            </Suspense>
             <button
               className="btn-privacy"
               onClick={() => setShowPrivacy(true)}

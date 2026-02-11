@@ -12,7 +12,21 @@
     <title>Bodhi</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><p style="font-family:system-ui;padding:2rem;color:#6b6b6b">Loading Bodhi...</p></div>
+    <script>
+      // Safety net: show errors instead of blank screen
+      window.onerror = function(msg, src, line, col, err) {
+        document.getElementById('root').innerHTML =
+          '<pre style="font-family:system-ui;padding:2rem;color:#5c1a2a;white-space:pre-wrap">' +
+          'Bodhi failed to load.\n\n' + msg + '\n' + (src||'') + ':' + line +
+          '\n\n' + (err && err.stack ? err.stack : '') + '</pre>';
+      };
+      window.onunhandledrejection = function(e) {
+        document.getElementById('root').innerHTML =
+          '<pre style="font-family:system-ui;padding:2rem;color:#5c1a2a;white-space:pre-wrap">' +
+          'Bodhi failed to load.\n\n' + (e.reason && e.reason.stack ? e.reason.stack : e.reason) + '</pre>';
+      };
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

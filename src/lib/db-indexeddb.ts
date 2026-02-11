@@ -1,6 +1,7 @@
 import { openDB, type IDBPDatabase } from "idb";
 import type { Note, NoteRow, DeletionRecord } from "../types/note";
-import { createNoteDoc, updateNoteDoc } from "./crdt";
+// crdt is dynamically imported to keep Automerge WASM off the critical load path
+async function getCrdt() { return import("./crdt"); }
 
 interface BodhiDB {
   notes: {
@@ -83,6 +84,7 @@ export async function createNote(body?: string, tags?: string[]): Promise<Note> 
   const timestamp = now();
   const noteBody = body ?? "";
   const noteTags = tags ?? [];
+  const { createNoteDoc } = await getCrdt();
   const crdtState = createNoteDoc("", noteBody, noteTags, timestamp, timestamp);
   const row: NoteRow = { id, title: "", body: noteBody, created_at: timestamp, updated_at: timestamp, crdt_state: crdtState };
   const tx = db.transaction(["notes", "note_tags"], "readwrite");
@@ -101,6 +103,7 @@ export async function updateNote(id: string, title: string, body: string): Promi
   if (!existing) return;
   const timestamp = now();
   const tags = await getTagsForNote(db, id);
+  const { createNoteDoc, updateNoteDoc } = await getCrdt();
   if (existing.crdt_state) {
     existing.crdt_state = updateNoteDoc(existing.crdt_state, title, body, tags, timestamp);
   } else {
@@ -133,6 +136,7 @@ export async function setNoteTags(noteId: string, tags: string[]): Promise<void>
   // Update CRDT state with new tags
   const existing = await db.get("notes", noteId);
   if (existing) {
+    const { createNoteDoc, updateNoteDoc } = await getCrdt();
     if (existing.crdt_state) {
       existing.crdt_state = updateNoteDoc(existing.crdt_state, existing.title, existing.body, tags, timestamp);
     } else {

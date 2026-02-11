@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { IS_TAURI, IS_PWA, IS_SYNC } from "../lib/env";
 import { validateSyncUrl } from "../lib/private-ip";
-import { checkServerStatus, setSyncBaseUrl } from "../lib/sync-client";
+// sync-client is dynamically imported to keep Automerge WASM off the critical load path
+async function getSyncClient() { return import("../lib/sync-client"); }
 import * as db from "../lib/db";
 
 const SETTING_KEY = "sync-server-url";
@@ -81,6 +82,7 @@ function PhonePairing({ onPaired }: { onPaired?: (paired: boolean) => void }) {
       const saved = await db.getSetting(SETTING_KEY);
       if (saved) {
         setServerUrl(saved);
+        const { setSyncBaseUrl } = await getSyncClient();
         setSyncBaseUrl(saved);
         onPaired?.(true);
       }
@@ -98,6 +100,7 @@ function PhonePairing({ onPaired }: { onPaired?: (paired: boolean) => void }) {
 
     setStatus("testing");
     setMessage("Reaching desktop...");
+    const { setSyncBaseUrl, checkServerStatus } = await getSyncClient();
     setSyncBaseUrl(result.url);
 
     try {
@@ -109,7 +112,8 @@ function PhonePairing({ onPaired }: { onPaired?: (paired: boolean) => void }) {
       setMessage("Connected");
       onPaired?.(true);
     } catch (e) {
-      setSyncBaseUrl("");
+      const sc = await getSyncClient();
+      sc.setSyncBaseUrl("");
       setStatus("error");
       // Detect mixed content / CORS failure
       if (e instanceof TypeError && e.message.includes("Failed to fetch")) {
@@ -126,6 +130,7 @@ function PhonePairing({ onPaired }: { onPaired?: (paired: boolean) => void }) {
   const handleTest = useCallback(async () => {
     if (!serverUrl) return;
     setStatus("testing");
+    const { setSyncBaseUrl, checkServerStatus } = await getSyncClient();
     setSyncBaseUrl(serverUrl);
     try {
       await checkServerStatus();
@@ -139,6 +144,7 @@ function PhonePairing({ onPaired }: { onPaired?: (paired: boolean) => void }) {
 
   const handleForget = useCallback(async () => {
     await db.deleteSetting(SETTING_KEY);
+    const { setSyncBaseUrl } = await getSyncClient();
     setSyncBaseUrl("");
     setServerUrl(null);
     setInput("");

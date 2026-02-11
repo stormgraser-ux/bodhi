@@ -1,6 +1,7 @@
 import Database from "@tauri-apps/plugin-sql";
 import type { Note, NoteRow, DeletionRecord } from "../types/note";
-import { createNoteDoc, updateNoteDoc } from "./crdt";
+// crdt is dynamically imported to keep Automerge WASM off the critical load path
+async function getCrdt() { return import("./crdt"); }
 
 let db: Database | null = null;
 
@@ -41,6 +42,7 @@ export async function createNote(body?: string, tags?: string[]): Promise<Note> 
   const timestamp = now();
   const noteBody = body ?? "";
   const noteTags = tags ?? [];
+  const { createNoteDoc } = await getCrdt();
   const crdtState = createNoteDoc("", noteBody, noteTags, timestamp, timestamp);
   await conn.execute(
     "INSERT INTO notes (id, title, body, created_at, updated_at, crdt_state) VALUES (?, ?, ?, ?, ?, ?)",
@@ -69,6 +71,7 @@ export async function updateNote(id: string, title: string, body: string): Promi
   );
   const tags = tagRows.map((t) => t.tag);
   const existing = rows[0]?.crdt_state;
+  const { createNoteDoc, updateNoteDoc } = await getCrdt();
   let crdtState: Uint8Array;
   if (existing) {
     crdtState = updateNoteDoc(new Uint8Array(existing), title, body, tags, timestamp);
@@ -106,6 +109,7 @@ export async function setNoteTags(noteId: string, tags: string[]): Promise<void>
   );
   if (rows[0]) {
     const { title, body, created_at, crdt_state } = rows[0];
+    const { createNoteDoc, updateNoteDoc } = await getCrdt();
     let crdtBin: Uint8Array;
     if (crdt_state) {
       crdtBin = updateNoteDoc(new Uint8Array(crdt_state), title, body, tags, timestamp);
